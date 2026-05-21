@@ -2,17 +2,14 @@ package com.jmgr.spring_batch_chunks.config;
 
 import java.io.File;
 
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.job.parameters.RunIdIncrementer;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.infrastructure.item.file.FlatFileItemReader;
-import org.springframework.batch.infrastructure.item.file.builder.FlatFileItemReaderBuilder;
-import org.springframework.batch.infrastructure.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.infrastructure.item.file.mapping.DefaultLineMapper;
-import org.springframework.batch.infrastructure.item.file.transform.DelimitedLineTokenizer;
-import org.springframework.batch.infrastructure.item.file.transform.LineTokenizer;
+import org.springframework.batch.infrastructure.item.json.JacksonJsonObjectReader;
+import org.springframework.batch.infrastructure.item.json.builder.JsonItemReaderBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +18,7 @@ import org.springframework.core.io.FileSystemResource;
 
 import com.jmgr.spring_batch_chunks.model.Student;
 import com.jmgr.spring_batch_chunks.reader.CsvItemReader;
+import com.jmgr.spring_batch_chunks.reader.JsonItemReader;
 import com.jmgr.spring_batch_chunks.writer.FirstItemWritter;
 
 @Configuration
@@ -28,6 +26,9 @@ public class SampleJob {
 
     @Autowired
     private CsvItemReader csvItemReader;
+
+    @Autowired
+    private JsonItemReader jsonItemReader;
 
     /*@Autowired
     private FirstItemProcessor firstItemProcessor;*/
@@ -46,8 +47,9 @@ public class SampleJob {
 
     public Step chunkStep(JobRepository jobRepository) throws Exception {
         return new StepBuilder("Chunk Step", jobRepository)
-                .<Student, Student>chunk(3)
-                .reader(csvItemReader.read())
+                .<Student, Student>chunk(6)
+                //.reader(csvItemReader.read())
+                .reader(jsonItemReader.read())
                 //.processor(firstItemProcessor)
                 .writer(firstItemWritter)
                 .build();
